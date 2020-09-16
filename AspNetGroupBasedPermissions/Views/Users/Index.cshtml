@@ -1,0 +1,40 @@
+﻿@model IEnumerable<ServiceLayer.UserServices.UserListDto>
+
+@{
+    ViewBag.Title = "Users";
+}
+
+<h2>Users</h2>
+
+@if (TempData["message"] != null)
+{
+    <div class="text-success">@TempData["message"]</div><br />
+}
+@if (TempData["errorMessage"] != null)
+{
+    <div class="text-danger"><strong>@TempData["errorMessage"]</strong></div>
+}
+
+<div>
+    <span>@Html.ActionLink("Create New User", "Create")</span>
+</div>
+<table class="table-condensed table-striped">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Mail)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Mail)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.UserId }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.UserId })
+        </td>
+    </tr>
+}
+</table>

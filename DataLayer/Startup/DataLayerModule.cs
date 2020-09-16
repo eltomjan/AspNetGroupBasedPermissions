@@ -1,7 +1,7 @@
 ﻿#region licence
 // The MIT License (MIT)
 //
-// Filename: Global.asax.cs
+// Filename: DataLayerModule.cs
 // Date Created: 2014/05/20
 //
 // Copyright (c) 2014 Jon Smith (www.selectiveanalytics.com & www.thereformedprogrammer.net)
@@ -24,34 +24,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #endregion
-using System.Web.Mvc;
-using System.Web.Optimization;
-using System.Web.Routing;
-using AspNetGroupBasedPermissions.Infrastructure;
-using GenericLibsBase;
+using System.Runtime.CompilerServices;
+using Autofac;
+using DataLayer.DataClasses;
+using GenericServices;
 
-namespace AspNetGroupBasedPermissions
+[assembly: InternalsVisibleTo("Tests")]
+
+namespace DataLayer.Startup
 {
-    public class MvcApplication : System.Web.HttpApplication
+    public class DataLayerModule : Module
     {
-        protected void Application_Start()
+
+        protected override void Load(ContainerBuilder builder)
         {
-            AreaRegistration.RegisterAllAreas();
-            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
-            RouteConfig.RegisterRoutes(RouteTable.Routes);
-            BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            //This allows interfaces etc to be provided as parameters to action methods
-            ModelBinders.Binders.DefaultBinder = new DiModelBinder();
+            //Autowire the classes with interfaces
+            builder.RegisterAssemblyTypes(GetType().Assembly).AsImplementedInterfaces();
 
-            //Now call the method to initialise anything that is required before startup (which includes setting up DI)
-        }
-
-        protected void Application_Error()
-        {
-            var ex = Server.GetLastError();
-            //log the error!
-            GenericLibsBaseConfig.GetLogger("LoggerSetup").Error(ex);
+            //set Entity Framework context to instance per lifetime scope.
+            //This is important as we get one context per lifetime, so all db classes are tracked together.
+            builder.RegisterType<AspNetGroupBasedPermissionsDb>().As<AspNetGroupBasedPermissionsDb>().As<IGenericServicesDbContext>().InstancePerLifetimeScope();
         }
     }
 }

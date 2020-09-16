@@ -1,4 +1,5 @@
 ﻿using GenericServices;
+using ServiceLayer.UserServices;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -10,6 +11,8 @@ namespace AspNetGroupBasedPermissions.Controllers
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
     public class MailAuthorize : AuthorizeAttribute
     {
+        private static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
+
         /// <summary>
         /// The name of the master page or view to use when rendering the view on authorization failure.  Default
         /// is null, indicating to use the master page of the specified view.
@@ -21,6 +24,12 @@ namespace AspNetGroupBasedPermissions.Controllers
         /// </summary>
         public virtual string ViewName { get; set; }
 
+        private static IListService _service;
+
+        public static void SetService(IListService service)
+        {
+            _service = service;
+        }
         public MailAuthorize()
             : base()
         {
@@ -41,9 +50,25 @@ namespace AspNetGroupBasedPermissions.Controllers
 
             if (filterContext.HttpContext.User.Identity.IsAuthenticated)
             {
-                ClaimsPrincipal user = (ClaimsPrincipal)filterContext.HttpContext.User;
-                var email = user.FindFirst("preferred_username")?.Value;
-                if (email == null) throw new ArgumentNullException("Missing e-mail !");
+                ClaimsPrincipal webUser = (ClaimsPrincipal)filterContext.HttpContext.User;
+                string webEmail = webUser.FindFirst("preferred_username")?.Value;
+                if (webEmail == null) throw new ArgumentNullException("Missing e-mail !");
+
+                var DBusersNo = _service.GetAll<UserListDto>().Count();
+                // No users => enable UsersController operations
+                if (DBusersNo == 0 && filterContext.HttpContext.Request.Url.AbsolutePath.IndexOf("/Users") == 0) return;
+                var DBuser = _service.GetAll<UserListDto>().FirstOrDefault(u => u.Mail == webEmail);
+
+                HttpRequestBase request = filterContext.RequestContext.HttpContext.Request;
+                if (DBuser != null)
+                {
+                    Log.Info($"{DBuser.Mail} {request.HttpMethod} {request.Url}.");
+                    return;
+                }
+                else
+                {
+                    Log.Warn($"!{webEmail} attempt to {request.HttpMethod} {request.Url}");
+                }
             } else {
                 // auth failed, redirect to login page
                 filterContext.Result = new HttpUnauthorizedResult();

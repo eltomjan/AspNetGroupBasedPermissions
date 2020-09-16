@@ -1,7 +1,7 @@
 ﻿#region licence
 // The MIT License (MIT)
 //
-// Filename: Global.asax.cs
+// Filename: AutofacDi.cs
 // Date Created: 2014/05/20
 //
 // Copyright (c) 2014 Jon Smith (www.selectiveanalytics.com & www.thereformedprogrammer.net)
@@ -24,34 +24,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #endregion
-using System.Web.Mvc;
-using System.Web.Optimization;
-using System.Web.Routing;
-using AspNetGroupBasedPermissions.Infrastructure;
-using GenericLibsBase;
+using System.Runtime.CompilerServices;
+using Autofac;
+using ServiceLayer.Startup;
 
-namespace AspNetGroupBasedPermissions
+[assembly: InternalsVisibleTo("Tests")]
+
+namespace AspNetGroupBasedPermissions.Infrastructure
 {
-    public class MvcApplication : System.Web.HttpApplication
+    internal static class AutofacDi
     {
-        protected void Application_Start()
+
+        private static IContainer _container;
+
+        internal static IContainer SetupDependency()
         {
-            AreaRegistration.RegisterAllAreas();
-            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
-            RouteConfig.RegisterRoutes(RouteTable.Routes);
-            BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            //This allows interfaces etc to be provided as parameters to action methods
-            ModelBinders.Binders.DefaultBinder = new DiModelBinder();
+            var builder = new ContainerBuilder();
+            Load(builder);
 
-            //Now call the method to initialise anything that is required before startup (which includes setting up DI)
+            _container = builder.Build();
+
+            return _container;
         }
 
-        protected void Application_Error()
+        private static void Load(ContainerBuilder builder)
         {
-            var ex = Server.GetLastError();
-            //log the error!
-            GenericLibsBaseConfig.GetLogger("LoggerSetup").Error(ex);
+            //register the service layer, which then registers all other dependencies in the rest of the system
+            builder.RegisterModule(new ServiceLayerModule());
         }
     }
 }

@@ -1,21 +1,21 @@
 ﻿#region licence
 // The MIT License (MIT)
-//
-// Filename: Global.asax.cs
+// 
+// Filename: ServiceLayerInitialise.cs
 // Date Created: 2014/05/20
-//
+// 
 // Copyright (c) 2014 Jon Smith (www.selectiveanalytics.com & www.thereformedprogrammer.net)
-//
+// 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//
+// 
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,34 +24,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #endregion
-using System.Web.Mvc;
-using System.Web.Optimization;
-using System.Web.Routing;
-using AspNetGroupBasedPermissions.Infrastructure;
-using GenericLibsBase;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using DataLayer.Startup;
 
-namespace AspNetGroupBasedPermissions
+
+namespace ServiceLayer.Startup
 {
-    public class MvcApplication : System.Web.HttpApplication
+    /// <summary>
+    /// This handles the initialisation of this layer and any other layers 
+    /// </summary>
+    public static class ServiceLayerInitialise
     {
-        protected void Application_Start()
+        /// <summary>
+        /// This should be called at Startup from Infrastructure.Configuration
+        /// </summary>
+        /// <param name="isAzure">true if working with azure database</param>
+        /// <param name="canCreateDatabase">true if the database provider allows the app to drop/create a database</param>
+        public static void InitialiseThis(bool isAzure, bool canCreateDatabase)
         {
-            AreaRegistration.RegisterAllAreas();
-            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
-            RouteConfig.RegisterRoutes(RouteTable.Routes);
-            BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            //This allows interfaces etc to be provided as parameters to action methods
-            ModelBinders.Binders.DefaultBinder = new DiModelBinder();
+            //Place any tasks that need initialising here
 
-            //Now call the method to initialise anything that is required before startup (which includes setting up DI)
-        }
+            DataLayerInitialise.InitialiseThis(isAzure, canCreateDatabase);
 
-        protected void Application_Error()
-        {
-            var ex = Server.GetLastError();
-            //log the error!
-            GenericLibsBaseConfig.GetLogger("LoggerSetup").Error(ex);
         }
     }
 }

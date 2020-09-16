@@ -1,25 +1,47 @@
-ASP.NET Identity: Implementing Group-Based Permissions
-======================================================
+SampleMvcWebApp
+===============
 
-This is an example project to accompany a blog post describing how to extend the ASP.NET MVC 5 Identity system and implement a Group-based permission scheme. Users belong to Groups, and Groups have sets of authorization permissions to exxecute code within the application (using [Authorize]). The article can be found at [ASP.NET MVC 5 Identity: Implementing Group-Based Permissions Management Part I][4]
+SampleMvcWebApp is a ASP.NET MVC5 web site designed to show number of useful methods for building enterprise
+ grade web applications using ASP.NET MVC5 and Entity Framework 6. 
+The code for this sample MVC web application, and the associated 
+[GenericServices Framework](https://github.com/JonPSmith/GenericServices) are both an open source project 
+by [Jon Smith](http://www.thereformedprogrammer.net/about-me/) 
+under the [MIT licence](http://opensource.org/licenses/MIT).
 
-This project builds upon the foundation created by another example, [ASP.NET Identity: Extending Identity Roles][3], covered in the article [Extending Identity Accounts and Implementing Role-Based Authentication in ASP.NET MVC 5][1]. You can see in the commit history the basic steps taken to move from the previous project structure to one with a basic, but flexible Group-based security model. 
+This code is available as a [live web site](http://samplemvcwebapp.net/) which includes explanations 
+of the code - see an example of this on the [Posts code explanation](http://samplemvcwebapp.net/Posts/CodeView) page.
 
-You may need to enable Nuget Package Restore in Visual Studio in order to download and restore Nuget packages during build. If you are not sure how to do this, see [Keep Nuget Packages Out of Source Control with Nuget Package Manager Restore][2] Apparrently, this is supposedly not required with Nuget anymore, but in case you need to . . .
+The GenericService Framework is available on [GitHub](https://github.com/JonPSmith/GenericServices) and soon via NuGet (when the release is stable).
 
-You will also need to run Entity Framework Migrations `Update-Database` command per the article. The migration files are included in the repo, so you will NOT need to `Enable-Migrations` or run `Add-Migration Init`. 
+**GenericServices is now available on NuGet.**
+See [NuGet Package Page](https://www.nuget.org/packages/GenericServices/) for more details.
 
-[4]: http://typecastexception.com/post/2014/02/19/ASPNET-MVC-5-Identity-Implementing-Group-Based-Permissions-Management-Part-I.aspx "ASP.NET MVC 5 Identity: Implementing Group-Based Permissions Management Part I"
+**An additinal, more complex example is now available.** 
+Visit [Complex.SampleMvcWebApp](http://complex.samplemvcwebapp.net/) to see more.
 
-[1]: http://typecastexception.com/post/2014/02/13/ASPNET-MVC-5-Identity-Extending-and-Modifying-Roles.aspx "ASP.NET MVC 5 Identity: Extending and Modifying Roles"
 
-[2]: http://www.typecastexception.com/post/2013/11/10/Keep-Nuget-Packages-Out-of-Source-Control-with-Nuget-Package-Manager-Restore.aspx "Keep Nuget Packages Out of Source Control with Nuget Package Manager Restore"
+The specific features in the code in this example are:
 
-[3]: https://github.com/TypecastException/AspNetExtendingIdentityRoles "ASP.NET Identity: Extending Identity Roles"
+### 1. Simple, but robust database services
 
-## Getting Started 
-After you've cloned the project, go ahead and restore the NuGet Packages from the solution or console. Then run the project. 
-You'll be able to log in and administer the groups and roles as well as users with the "test@test.com" user.
+Database accesses are normally a big part of enterprise systems build with APS.NET MVC. 
+However, my experience is that creating these services in a robust and comprehensive form can lead to 
+a lot of repetative code that does the same thing, but for different data. 
+My aim has been to produce a generic framework that handles most of the cases, and is 
+easily extensible when special handling is required. Examples of there use on this web site are:
 
-    Username: test@test.com
-    Password: Password1
+ - See normal, synchronous access using a DTO for shaping in the [Posts Controller](https://github.com/JonPSmith/SampleMvcWebApp/blob/master/SampleWebApp/Controllers/PostsController.cs)
+ - See new EF6 async access using a DTO for shaping in the [PostsAsync Controller](https://github.com/JonPSmith/SampleMvcWebApp/blob/master/SampleWebApp/Controllers/PostsAsyncController.cs)
+ - See normal, synchronous access directly via data class in the [Tags Controller](https://github.com/JonPSmith/SampleMvcWebApp/blob/master/SampleWebApp/Controllers/TagsController.cs)
+ - See new EF6 async access directly via data class in the [TagsAsync Controller](https://github.com/JonPSmith/SampleMvcWebApp/blob/master/SampleWebApp/Controllers/TagsAsyncController.cs)
+
+### 1. Use of Dependency Injection
+
+The GenericService framework is designed specifically to work with Dependency Injection (DI). 
+DI is used throughout this web site, but specific examples are:
+
+ - Inserting the required services into a controller by action parameter injection.
+ - DI is also used for creating the GenericService etc. See Code Explanation for more information.
+
+Note that the SampleMvcWebApp uses AutoFac dependency injection framework, 
+but the framework allows you to replace AutoFac with your own favourite DI tool.

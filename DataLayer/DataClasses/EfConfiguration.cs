@@ -1,21 +1,21 @@
 ﻿#region licence
 // The MIT License (MIT)
-//
-// Filename: Global.asax.cs
-// Date Created: 2014/05/20
-//
+// 
+// Filename: EfConfiguration.cs
+// Date Created: 2014/08/14
+// 
 // Copyright (c) 2014 Jon Smith (www.selectiveanalytics.com & www.thereformedprogrammer.net)
-//
+// 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//
+// 
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,34 +24,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #endregion
-using System.Web.Mvc;
-using System.Web.Optimization;
-using System.Web.Routing;
-using AspNetGroupBasedPermissions.Infrastructure;
-using GenericLibsBase;
 
-namespace AspNetGroupBasedPermissions
+using System.Data.Entity;
+using System.Data.Entity.SqlServer;
+
+namespace DataLayer.DataClasses
 {
-    public class MvcApplication : System.Web.HttpApplication
+    public class EfConfiguration : DbConfiguration
     {
-        protected void Application_Start()
+        /// <summary>
+        /// This flag should be set to true if we are working with an Azure database.
+        /// It should be set before EF uses the configuration, i.e. beofre the first access 
+        /// </summary>
+        public static bool IsAzure { get; internal set; }
+
+        public EfConfiguration()
         {
-            AreaRegistration.RegisterAllAreas();
-            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
-            RouteConfig.RegisterRoutes(RouteTable.Routes);
-            BundleConfig.RegisterBundles(BundleTable.Bundles);
-
-            //This allows interfaces etc to be provided as parameters to action methods
-            ModelBinders.Binders.DefaultBinder = new DiModelBinder();
-
-            //Now call the method to initialise anything that is required before startup (which includes setting up DI)
+            if (IsAzure)
+                SetExecutionStrategy("System.Data.SqlClient", () => new SqlAzureExecutionStrategy());
         }
 
-        protected void Application_Error()
-        {
-            var ex = Server.GetLastError();
-            //log the error!
-            GenericLibsBaseConfig.GetLogger("LoggerSetup").Error(ex);
-        }
     }
 }

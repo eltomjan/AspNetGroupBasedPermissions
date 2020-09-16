@@ -1,7 +1,7 @@
 ﻿#region licence
 // The MIT License (MIT)
 //
-// Filename: Global.asax.cs
+// Filename: DiModelBinder.cs
 // Date Created: 2014/05/20
 //
 // Copyright (c) 2014 Jon Smith (www.selectiveanalytics.com & www.thereformedprogrammer.net)
@@ -24,34 +24,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 #endregion
+using System;
 using System.Web.Mvc;
-using System.Web.Optimization;
-using System.Web.Routing;
-using AspNetGroupBasedPermissions.Infrastructure;
-using GenericLibsBase;
 
-namespace AspNetGroupBasedPermissions
+namespace AspNetGroupBasedPermissions.Infrastructure
 {
-    public class MvcApplication : System.Web.HttpApplication
+    public class DiModelBinder : DefaultModelBinder
     {
-        protected void Application_Start()
+        protected override object CreateModel(ControllerContext controllerContext, ModelBindingContext bindingContext, Type modelType)
         {
-            AreaRegistration.RegisterAllAreas();
-            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
-            RouteConfig.RegisterRoutes(RouteTable.Routes);
-            BundleConfig.RegisterBundles(BundleTable.Bundles);
-
-            //This allows interfaces etc to be provided as parameters to action methods
-            ModelBinders.Binders.DefaultBinder = new DiModelBinder();
-
-            //Now call the method to initialise anything that is required before startup (which includes setting up DI)
-        }
-
-        protected void Application_Error()
-        {
-            var ex = Server.GetLastError();
-            //log the error!
-            GenericLibsBaseConfig.GetLogger("LoggerSetup").Error(ex);
+            return modelType.IsInterface
+                       ? DependencyResolver.Current.GetService(modelType)
+                       : base.CreateModel(controllerContext, bindingContext, modelType);
         }
     }
 }
