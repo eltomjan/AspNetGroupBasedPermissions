@@ -1,0 +1,9 @@
+﻿@if (Request.IsAuthenticated)
+{
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            @Html.ActionLink("Hello " + @System.Security.Claims.ClaimsPrincipal.Current.FindFirst("name").Value + "!", "Index", "Home")
+        </li>
+        <li><a href="/Home/SignOut">Log off</a></li>
+    </ul>
+}
